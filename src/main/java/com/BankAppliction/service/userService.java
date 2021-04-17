@@ -11,8 +11,10 @@ public interface userService {
 
     List<User> getEmployeeByFirstName(String firstName);
 
-    List<User> getEmployeeByEmail(String emailId);
+    User getEmployeeByEmail(String emailId);
 
     List<User> getEmployeeById(ObjectId _id);
+
+    User createUser(User user);
 
 }
