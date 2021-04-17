@@ -7,12 +7,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.*;
+import org.springframework.data.annotation.TypeAlias;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
+@TypeAlias("user")
 public class User {
 	@Id
 	private ObjectId _id;
