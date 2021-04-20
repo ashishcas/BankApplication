@@ -1,21 +1,23 @@
 package com.BankAppliction.service.impl;
 
 import com.BankAppliction.model.User;
-import com.BankAppliction.repositories.repository;
-import com.BankAppliction.service.userService;
+import com.BankAppliction.repositories.UserRepository;
+import com.BankAppliction.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class userServiceImpl implements userService {
+public class UserServiceImpl implements UserService {
+
 
     @Autowired
-    repository userRepository;
+    UserRepository userRepository;
 
     @Override
     public List<User> getAll() {
@@ -60,9 +62,12 @@ public class userServiceImpl implements userService {
 
         User userExists = getEmployeeByEmail(user.getEmailId());
         if(userExists.getEmailId().equals("NotFound")){
+            String encodedString = Base64.getEncoder().encodeToString(user.getPassword().getBytes());
+            user.setPassword(encodedString);
             return userRepository.save(user);
         } else {
             return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
         }
+        
     }
 }

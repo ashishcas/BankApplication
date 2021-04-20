@@ -5,7 +5,7 @@ import org.bson.types.ObjectId;
 
 import java.util.List;
 
-public interface userService {
+public interface UserService {
 
     List<User> getAll();
 
