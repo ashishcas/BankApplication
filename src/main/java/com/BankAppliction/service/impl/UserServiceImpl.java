@@ -1,9 +1,12 @@
 package com.BankAppliction.service.impl;
 
+import com.BankAppliction.controllers.Maincontroller;
 import com.BankAppliction.model.User;
 import com.BankAppliction.repositories.UserRepository;
 import com.BankAppliction.service.UserService;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,8 @@ import java.util.regex.Pattern;
 @Service
 public class UserServiceImpl implements UserService {
 
+
+	private static final Logger logger=LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     UserRepository userRepository;
@@ -65,9 +70,31 @@ public class UserServiceImpl implements UserService {
             String encodedString = Base64.getEncoder().encodeToString(user.getPassword().getBytes());
             user.setPassword(encodedString);
             return userRepository.save(user);
-        } else {
+        }
+        else {
             return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
         }
         
     }
+    public User loginUser(String email, String password) {
+
+        // Check for valid email using regex
+        String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+
+        System.out.println(email);
+        List<User> users = userRepository.findAll();
+        for (User other : users) {
+            String encodedString = Base64.getEncoder().encodeToString(password.getBytes());
+            logger.info("entered password:{}, encryptedPassword:{}, getPassword:{}",password,encodedString,other.getPassword());
+            if (other.getEmailId().equals(email) && encodedString.equals(other.getPassword())) {
+            	System.out.println(other);
+                return other;
+            }
+        
+    }
+        return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
+
+}
 }
