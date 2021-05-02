@@ -78,7 +78,7 @@ public class JwtTokenUtil {
             PrivateKey privateKey = readPrivateKey();
             String token = Jwts
                     .builder()
-                    .claim("userId", user.get_id())
+                    .claim("id", user.get_id())
                     .claim("email",user.getEmailId())
                     .setIssuedAt(new Date(System.currentTimeMillis()))
                     .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))
