@@ -8,6 +8,9 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
@@ -24,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    MongoTemplate mongoTemplate;
+
     @Override
     public List<User> getAll() {
         return userRepository.findAll();
@@ -37,7 +43,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getEmployeeByEmail(String emailId) {
 
-        List<User> userList = userRepository.findAll();
+
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("emailId").is(emailId));
+        List<User> userList = mongoTemplate.find(query, User.class);
 
         for(User user: userList ){
             if(user.getEmailId().equals(emailId)){
