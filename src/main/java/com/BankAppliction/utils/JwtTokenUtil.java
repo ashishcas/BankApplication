@@ -1,20 +1,11 @@
 package com.BankAppliction.utils;
 
-import ch.qos.logback.classic.Level;
-import com.BankAppliction.controllers.Maincontroller;
 import com.BankAppliction.model.User;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.impl.TextCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import sun.awt.X11.XSystemTrayPeer;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,7 +21,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
@@ -121,6 +111,12 @@ public class JwtTokenUtil {
              claims= getTokenClaims(token);
         } catch(ExpiredJwtException exp){
             logger.error("Jwt Token expired");
+            claims = null;
+        } catch(SignatureException e){
+            logger.error("invalid Public key");
+            claims = null;
+        } catch (Exception e){
+            logger.error("get token claims failed");
             claims = null;
         }
         return claims;
