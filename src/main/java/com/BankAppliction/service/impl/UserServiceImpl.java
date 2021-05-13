@@ -107,7 +107,4 @@ public class UserServiceImpl implements UserService {
         return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
 
     }
-
-
-
 }
