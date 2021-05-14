@@ -1,5 +1,6 @@
 package com.BankAppliction.controllers;
 
+import com.BankAppliction.exceptions.ResourceNotFoundException;
 import com.BankAppliction.model.User;
 import com.BankAppliction.repositories.UserRepository;
 
@@ -29,7 +30,6 @@ public class Maincontroller {
 
 	@Autowired
 	private UserRepository userrepo;
-
 	@Autowired
 	private UserServiceImpl userServiceImpl;
 
@@ -64,28 +64,36 @@ public class Maincontroller {
 
 	@PostMapping("/login")
 	public ResponseEntity<User> loginUser( @RequestBody ObjectNode objectNode) {
-		String emailId=objectNode.get("emailId").asText();
-		String password=objectNode.get("password").asText();
-		logger.info("emailId: {},password: {}",emailId,password);
+		try {
+			String emailId = objectNode.get("emailId").asText();
+			String password = objectNode.get("password").asText();
+			logger.info("emailId: {},password: {}", emailId, password);
 
-		User newUser = userServiceImpl.loginUser(emailId,password) ;
-		logger.info("newUser: {},password: {}",newUser,password);
+			User newUser = userServiceImpl.loginUser(emailId, password);
+			logger.info("newUser: {},password: {}", newUser, password);
 
-		if(newUser.getEmailId().equals("UserExists")){
-			ErrorHandler err = new ErrorHandler("400",HttpStatus.BAD_REQUEST,"user exists try different email","USER_EXISTS");
-			err.getMessage();
+			if (newUser.getEmailId().equals("UserExists")) {
+				ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try different email or password", "INVALID_CREDENTIALS");
+				err.getMessage();
+				return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
+			}
+
+			if (newUser.getEmailId().equals("InvalidEmail")) {
+				ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email", "INVALID_EMAIL");
+				return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
+			}
+			String accessToken = jwtTokenUtil.generateToken(newUser);
+			HttpHeaders returnHeaders = new HttpHeaders();
+			returnHeaders.add("accesstoken", accessToken);
+			return new ResponseEntity(newUser, returnHeaders, HttpStatus.OK);
+		} catch (ResourceNotFoundException exp){
+			ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email and password", "INVALID_EMAIL");
+			return new ResponseEntity(err, HttpStatus.NOT_FOUND);
+		} catch(NullPointerException exception){
+			ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email", "INVALID_EMAIL");
 			return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
 		}
-
-		if(newUser.getEmailId().equals("InvalidEmail")){
-			ErrorHandler err = new ErrorHandler("400",HttpStatus.BAD_REQUEST,"try valid email","INVALID_EMAIL");
-			return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
-		}
-		String accessToken = jwtTokenUtil.generateToken(newUser);
-		HttpHeaders returnHeaders = new HttpHeaders();
-		returnHeaders.add("accesstoken", accessToken);
-		return new ResponseEntity(newUser,returnHeaders, HttpStatus.OK);
-		}
+	}
 
 		// route for testing token parsing
 		@PostMapping("/tokenParser")

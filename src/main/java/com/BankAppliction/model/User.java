@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.*;
 import org.springframework.data.annotation.TypeAlias;
 
+import javax.validation.constraints.Email;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,6 +19,7 @@ import org.springframework.data.annotation.TypeAlias;
 @TypeAlias("user")
 public class User {
 	@Id
+	@ToString.Exclude
 	private ObjectId _id;
 	private String firstName;
 	private String secondName;

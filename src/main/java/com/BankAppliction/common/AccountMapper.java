@@ -1,27 +1,20 @@
-package com.BankAppliction.model;
+package com.BankAppliction.common;
 
-import lombok.*;
+import lombok.Generated;
+import lombok.Getter;
+import lombok.Setter;
 import org.bson.types.ObjectId;
-
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+@Getter
+@Setter
+public class AccountMapper {
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Builder
-@TypeAlias("account")
-@Document(collection ="account")
-public class BankAccount {
-
-    @Id
-    @Generated
+    @NotNull
     private ObjectId _id;
 
     @Pattern(regexp="^\\d{11}", message="please give valid accountNumber")
@@ -50,4 +43,8 @@ public class BankAccount {
     @NotNull
     @Pattern(regexp ="^[A-Za-z]{4}0[A-Z0-9a-z]{6}$",message="invalid IFSC code")
     private String ifscCode;
+
+    @NotNull
+    private String access_token;
+
 }
