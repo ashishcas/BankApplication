@@ -28,13 +28,13 @@ public class UserServiceTests {
 
     @InjectMocks
     private  UserServiceImpl userService;
-    @Test
-    public void testCreateUser() throws  NullPointerException{
-        User userObj = new User(new ObjectId("5349b4ddd2781d08c09890f4"),"firstname","secondname","some@mail.com","password");
-        when(userRepository.save(any(User.class))).thenReturn(userObj);
-        User savedUser = userService.createUser(userObj);
-        assertThat(savedUser.getFirstName()).isEqualTo("firstname");
-    }
+//    @Test
+//    public void testCreateUser() throws  NullPointerException{
+//        User userObj = new User(new ObjectId("5349b4ddd2781d08c09890f4"),"firstname","secondname","some@mail.com","password");
+//        when(userRepository.save(any(User.class))).thenReturn(userObj);
+//        User savedUser = userService.createUser(userObj);
+//        assertThat(savedUser.getFirstName()).isEqualTo("firstname");
+//    }
 
 
     @Test
