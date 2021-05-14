@@ -1,23 +1,18 @@
 package com.BankAppliction.utils;
 
-import ch.qos.logback.classic.Level;
 import com.BankAppliction.model.User;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.impl.TextCodec;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -26,7 +21,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Component
 public class JwtTokenUtil {
@@ -36,6 +30,7 @@ public class JwtTokenUtil {
 
     private String publicKeyPath = "/home/ashish/public_key.pem";
 
+    private static final Logger logger= LoggerFactory.getLogger(JwtTokenUtil.class);
 
     public static RSAPublicKey readPublicKey(String publicKeyPath) throws Exception {
 
@@ -78,6 +73,7 @@ public class JwtTokenUtil {
             PrivateKey privateKey = readPrivateKey();
             String token = Jwts
                     .builder()
+                    .setSubject(String.valueOf(UUID.randomUUID()))
                     .claim("id", user.get_id())
                     .claim("email",user.getEmailId())
                     .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -99,5 +95,31 @@ public class JwtTokenUtil {
             return  "exp";
         }
     }
-    
+
+    public Claims getTokenClaims (String Token) throws Exception {
+
+        PublicKey publicKey = readPublicKey(publicKeyPath);
+        return Jwts.parser()
+                .setSigningKey(publicKey)
+                .parseClaimsJws(Token)
+                .getBody();
+    }
+
+    public Claims validateToken(String token) throws Exception {
+        Claims claims;
+        try {
+             claims= getTokenClaims(token);
+        } catch(ExpiredJwtException exp){
+            logger.error("Jwt Token expired");
+            claims = null;
+        } catch(SignatureException e){
+            logger.error("invalid Public key");
+            claims = null;
+        } catch (Exception e){
+            logger.error("get token claims failed");
+            claims = null;
+        }
+        return claims;
+    }
+
 }
