@@ -5,6 +5,10 @@ import org.bson.types.ObjectId;
 
 import java.util.List;
 
+/**
+ * @author ashish
+ * service for handling bank account
+ * */
 public interface UserService {
 
     List<User> getAll();

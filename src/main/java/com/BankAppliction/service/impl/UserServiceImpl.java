@@ -1,6 +1,7 @@
 package com.BankAppliction.service.impl;
 
 import com.BankAppliction.controllers.Maincontroller;
+import com.BankAppliction.exceptions.ResourceNotFoundException;
 import com.BankAppliction.model.User;
 import com.BankAppliction.repositories.UserRepository;
 import com.BankAppliction.service.UserService;
@@ -42,9 +43,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getEmployeeByEmail(String emailId) {
-
-
-
         Query query = new Query();
         query.addCriteria(Criteria.where("emailId").is(emailId));
         List<User> userList = mongoTemplate.find(query, User.class);
@@ -81,29 +79,39 @@ public class UserServiceImpl implements UserService {
             user.setPassword(encodedString);
             return userRepository.save(user);
         }
-        else {
-            return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
-        }
+
+        return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
         
     }
-    public User loginUser(String email, String password) {
+
+    /**
+     *
+     * */
+    public User loginUser(String email, String password) throws ResourceNotFoundException {
 
         // Check for valid email using regex
         String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
 
-        System.out.println(email);
-        List<User> users = userRepository.findAll();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("emailId").is(email));
+        List<User> users = null;
+        try {
+           users = mongoTemplate.find(query, User.class);
+        } catch(ResourceNotFoundException exp){
+            exp.printStackTrace();
+        }
         for (User other : users) {
+            System.out.println(other);
             String encodedString = Base64.getEncoder().encodeToString(password.getBytes());
             logger.info("entered password:{}, encryptedPassword:{}, getPassword:{}",password,encodedString,other.getPassword());
-            if (other.getEmailId().equals(email) && encodedString.equals(other.getPassword())) {
-            	System.out.println(other);
+            if (encodedString.equals(other.getPassword())) {
+            	System.out.println("Inside If"+ other);
                 return other;
             }
         
-    }
+        }
         return  User.builder().firstName("UserExists").secondName("UserExists").password("UserExists").emailId("UserExists").build();
 
     }
