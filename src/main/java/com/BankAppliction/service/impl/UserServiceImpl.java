@@ -97,10 +97,10 @@ public class UserServiceImpl implements UserService {
         Query query = new Query();
         query.addCriteria(Criteria.where("emailId").is(email));
         List<User> users = null;
-        try {
-           users = mongoTemplate.find(query, User.class);
-        } catch(ResourceNotFoundException exp){
-            exp.printStackTrace();
+        users = mongoTemplate.find(query, User.class);
+        if(users.size() == 0){
+            User userObj = null;
+            return userObj;
         }
         for (User other : users) {
             System.out.println(other);

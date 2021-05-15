@@ -64,7 +64,6 @@ public class Maincontroller {
 
 	@PostMapping("/login")
 	public ResponseEntity<User> loginUser( @RequestBody ObjectNode objectNode) {
-		try {
 			String emailId = objectNode.get("emailId").asText();
 			String password = objectNode.get("password").asText();
 			logger.info("emailId: {},password: {}", emailId, password);
@@ -72,9 +71,11 @@ public class Maincontroller {
 			User newUser = userServiceImpl.loginUser(emailId, password);
 			logger.info("newUser: {},password: {}", newUser, password);
 
+			if(newUser == null){
+				throw new ResourceNotFoundException(" user not found");
+			}
 			if (newUser.getEmailId().equals("UserExists")) {
 				ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try different email or password", "INVALID_CREDENTIALS");
-				err.getMessage();
 				return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
 			}
 
@@ -82,17 +83,11 @@ public class Maincontroller {
 				ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email", "INVALID_EMAIL");
 				return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
 			}
+
 			String accessToken = jwtTokenUtil.generateToken(newUser);
 			HttpHeaders returnHeaders = new HttpHeaders();
 			returnHeaders.add("accesstoken", accessToken);
 			return new ResponseEntity(newUser, returnHeaders, HttpStatus.OK);
-		} catch (ResourceNotFoundException exp){
-			ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email and password", "INVALID_EMAIL");
-			return new ResponseEntity(err, HttpStatus.NOT_FOUND);
-		} catch(NullPointerException exception){
-			ErrorHandler err = new ErrorHandler("400", HttpStatus.BAD_REQUEST, "try valid email", "INVALID_EMAIL");
-			return new ResponseEntity(err, HttpStatus.BAD_REQUEST);
-		}
 	}
 
 		// route for testing token parsing
