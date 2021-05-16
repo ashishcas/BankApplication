@@ -1,5 +1,6 @@
 package com.BankAppliction.controllers;
 
+import com.BankAppliction.common.LoginResponseMapper;
 import com.BankAppliction.exceptions.ResourceNotFoundException;
 import com.BankAppliction.model.User;
 import com.BankAppliction.repositories.UserRepository;
@@ -10,6 +11,7 @@ import com.BankAppliction.utils.JwtTokenUtil;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 
+import com.google.gson.JsonElement;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.bson.types.ObjectId;
@@ -86,8 +88,13 @@ public class Maincontroller {
 
 			String accessToken = jwtTokenUtil.generateToken(newUser);
 			HttpHeaders returnHeaders = new HttpHeaders();
-			returnHeaders.add("accesstoken", accessToken);
-			return new ResponseEntity(newUser, returnHeaders, HttpStatus.OK);
+			String loginResponse = gson.toJson(newUser,User.class);
+			JsonElement jsonElement = gson.toJsonTree(newUser);
+			jsonElement.getAsJsonObject().addProperty("access_token", accessToken);
+			loginResponse = gson.toJson(jsonElement);
+		   	LoginResponseMapper response = gson.fromJson(loginResponse, LoginResponseMapper.class);
+
+			return new ResponseEntity(response, HttpStatus.OK);
 	}
 
 		// route for testing token parsing
