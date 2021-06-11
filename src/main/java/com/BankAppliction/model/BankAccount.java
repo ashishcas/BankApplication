@@ -22,7 +22,7 @@ public class BankAccount {
 
     @Id
     @Generated
-    private ObjectId _id;
+    private String _id;
 
     @Pattern(regexp="^\\d{11}", message="please give valid accountNumber")
     @NotNull

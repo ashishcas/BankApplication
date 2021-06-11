@@ -1,10 +1,11 @@
 package com.BankAppliction.service;
 
 import com.BankAppliction.common.AccountMapper;
+import com.BankAppliction.common.CreateBankAccountMapper;
 import com.BankAppliction.model.BankAccount;
 
 public interface AccountService {
-    BankAccount createAccount(BankAccount account,String token);
+    BankAccount createAccount(CreateBankAccountMapper account, String token);
 
     BankAccount updateAccount(BankAccount account);
 
