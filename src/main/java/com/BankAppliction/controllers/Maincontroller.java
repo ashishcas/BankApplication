@@ -46,7 +46,6 @@ public class Maincontroller {
 	public ResponseEntity<User> addUser(@Validated @RequestBody User user ) {
 		user.set_id(ObjectId.get());
 		User newUser = userServiceImpl.createUser(user) ;
-
 		if(newUser.getEmailId().equals("UserExists")){
 			ErrorHandler err = new ErrorHandler("400",HttpStatus.BAD_REQUEST,"user exists try different email","USER_EXISTS");
 			err.getMessage();

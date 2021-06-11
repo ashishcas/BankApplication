@@ -1,21 +1,28 @@
 package com.BankAppliction.service.impl;
 
 import com.BankAppliction.common.AccountMapper;
+import com.BankAppliction.common.CreateBankAccountMapper;
+import com.BankAppliction.exceptions.ResourceAlreadyExistsException;
 import com.BankAppliction.exceptions.UnauthorizedException;
 import com.BankAppliction.model.BankAccount;
 import com.BankAppliction.model.User;
 import com.BankAppliction.repositories.AccountRepository;
 import com.BankAppliction.service.AccountService;
 import com.BankAppliction.utils.JwtTokenUtil;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import io.jsonwebtoken.Claims;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +40,9 @@ public class AccountServiceImpl implements AccountService {
     MongoTemplate mongoTemplate;
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private Gson gson;
 
     private static final Logger logger= LoggerFactory.getLogger(AccountServiceImpl.class);
 
@@ -53,22 +63,39 @@ public class AccountServiceImpl implements AccountService {
     
     
     @Override
-    public BankAccount createAccount(BankAccount account, String token) {
+    public BankAccount createAccount(CreateBankAccountMapper account, String token) {
 
         Claims claims;
 
         try {
             claims = jwtTokenUtil.validateToken(token);
-            
-            BankAccount accountExists = getAccountByUserId(account.getUserId());
-            if(accountExists.get_id().equals("NotFound")){
 
-                return accountRepository.save(account);
+            String id = claims.get("id",String.class);
+            BankAccount accountExists = getAccountByUserId(id);
+            if(accountExists == null){
+                Random r = new Random();
+                long accountNumber = r.nextInt(1_000_000_000)               // Last 9 digits
+                        + (r.nextInt(90) + 10) * 1_000_000_000L;
+                String  accountData = gson.toJson(account,CreateBankAccountMapper.class);
+                JsonElement jsonElement = gson.fromJson(accountData, JsonElement.class);
+//                        gson.toJsonTree(accountData);
+
+                jsonElement.getAsJsonObject().addProperty("_id", ObjectId.get().toString());
+                jsonElement.getAsJsonObject().addProperty("accountNumber",Long.toString(accountNumber));
+                jsonElement.getAsJsonObject().addProperty("userId",id);
+                jsonElement.getAsJsonObject().addProperty("currentBalance",0);
+                accountData = gson.toJson(jsonElement);
+
+                BankAccount bankaccount = gson.fromJson(accountData, BankAccount.class);
+                return accountRepository.save(bankaccount);
+            } else {
+                // throw an exception account already exists
+                BankAccount response = null;
+                return  response;
             }
         }catch(Exception exp){
             exp.printStackTrace();
             logger.error("authorization failed");
-
         }
 
         return null;
