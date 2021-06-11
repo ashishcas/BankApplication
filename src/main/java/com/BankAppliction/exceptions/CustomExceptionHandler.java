@@ -40,6 +40,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorHandler error = new ErrorHandler("401", HttpStatus.UNAUTHORIZED,"user not authenticated",details);
         return new ResponseEntity(error, HttpStatus.UNAUTHORIZED);
     }
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public final ResponseEntity<Object> handleResourceAlreadyExists(ResourceAlreadyExistsException ex, WebRequest request) {
+        List<String> details = new ArrayList<>();
+        details.add(ex.getLocalizedMessage());
+        ErrorHandler error = new ErrorHandler("400", HttpStatus.CONFLICT,"account already exists",details);
+        return new ResponseEntity(error, HttpStatus.CONFLICT);
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
