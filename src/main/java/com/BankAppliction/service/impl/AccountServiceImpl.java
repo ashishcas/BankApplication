@@ -63,11 +63,11 @@ public class AccountServiceImpl implements AccountService {
     
     
     @Override
-    public BankAccount createAccount(CreateBankAccountMapper account, String token) {
+    public BankAccount createAccount(CreateBankAccountMapper account, String token) throws Exception {
 
         Claims claims;
 
-        try {
+//        try {
             claims = jwtTokenUtil.validateToken(token);
 
             String id = claims.get("id",String.class);
@@ -91,14 +91,9 @@ public class AccountServiceImpl implements AccountService {
             } else {
                 // throw an exception account already exists
                 BankAccount response = null;
-                return  response;
-            }
-        }catch(Exception exp){
-            exp.printStackTrace();
-            logger.error("authorization failed");
-        }
+                throw new ResourceAlreadyExistsException("Bank account already exists");
 
-        return null;
+            }
     }
 
     @Override
